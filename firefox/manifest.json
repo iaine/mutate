@@ -1,0 +1,25 @@
+{
+
+  "manifest_version": 2,
+  "name": "Sonify Mutations",
+  "version": "1.0",
+
+  "description": "Sonifies changes in HTML on a page",
+
+  "icons": {
+    "48": "icons/border-48.png"
+  },
+"applications": {
+      "gecko": {
+         "id": "iain_emsley@austgate.co.uk"
+      }
+   },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*/"],
+      "js": ["mutate.js"]
+    }
+  ]
+
+}
