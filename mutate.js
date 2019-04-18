@@ -3,8 +3,6 @@
 */
 let audioCtx = new AudioContext();
 
-let _id = 0;
-
 let adsr = function (audioCtx, T, adsrEnv) {
     var gainNode = audioCtx.createGain();
     function set(v, t) { gainNode.gain.linearRampToValueAtTime(v, T + t); }
@@ -41,9 +39,15 @@ var checkButtons = function() {
 
 //let audioCtx = new AudioContext();
 
-let adsrEnv = {'a':0.1, 'd':0.8, 's':0.3, 'r':0.1, 'sustain': 0.1};
+let adsrEnv = {'a':0.1, 'd':0.4, 's':0.15, 'r':0.1, 'sustain': 0.1};
 
 let detune = 0;
+
+const power = Math.pow(2, 1 / 12);
+
+let calculateNewNote = function (base, newnote) {
+  return base * Math.pow(power, newnote);
+};
 
 //watch for changes across the document
 // and track them
@@ -58,20 +62,20 @@ var callback = function(mutationsList, observer) {
 
         if (mutation.type == 'childList') {
             if (mutation.addedNodes.length > 0) {
-            var added =  mutation.addedNodes;
-            detune = 0;
-            added.forEach(y => {
-              console.log('A child node has been added.');
-              playEnvelopeTone(audioCtx,260.25,0.5,0.5,adsrEnv, detune);
-            });
+              let added =  mutation.addedNodes;
+              detune = 0;
+              for (let i=0;i<added.length;i++) {
+                console.log('A child node has been added.');
+                playEnvelopeTone(audioCtx,calculateNewNote(260.25, i),0.5,0.5,adsrEnv, detune);
+              }
 
             } else {
-            var removed =  mutation.removedNodes;
-            detune = 0;
-            removed.forEach(y => {
-              console.log('A child node has been removed.');
-              playEnvelopeTone(audioCtx, 440.3,0.5,0.5,adsrEnv, detune);
-            });
+              let removed =  mutation.removedNodes;
+              detune = 0;
+              for (let j=(removed.length -1 );j>-1;j--) {
+                console.log('A child node has been removed.');
+                playEnvelopeTone(audioCtx, calculateNewNote(440.3, j),0.5,0.5,adsrEnv, detune);
+              };
 
            }
         }
