@@ -1,0 +1,30 @@
+{
+
+  "manifest_version": 2,
+  "name": "Sonify Media Events",
+  "version": "0.1",
+
+  "description": "Sonifies event actions such as clicks",
+
+  "icons": {
+    "48": "icons/border-48.png"
+  },
+  "applications": {
+      "gecko": {
+         "id": "iain_emsley@austgate.co.uk"
+      }
+   },
+  "permissions": [
+    "webRequest",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["msa.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["touch.js"]
+    }
+  ]
+}
