@@ -53,9 +53,46 @@ let playTone = function (audioContext, frequency, note_length, volume) {
 function logURL(requestDetails) {
   console.log("Background Loading: " + requestDetails.url);
   console.log("Method: " + requestDetails.method);
-  //@todo: swap the frequency based on type.
-  const adsrEnv = {'a': 0.1, 'd': 0.8, 's': 0.3, 'r': 0.1, 'sustain': 0.1};
-  playTone(audioCtx, 329.63, 0.1, 0.5,)
+  if (requestDetails.url != "http://127.0.0.1:3000/") {
+    //@todo: swap the frequency based on type.
+    const adsrEnv = {'a': 0.1, 'd': 0.8, 's': 0.3, 'r': 0.1, 'sustain': 0.1};
+    playTone(audioCtx, 329.63, 0.1, 0.5);
+    putData(makeAnnotationBody(requestDetails.url, requestDetails.method));
+  }
+}
+
+/**
+ *  Generic PUT Function
+ *
+ */
+var putData = function (annotation) {
+  console.log(annotation);
+  /*var oReq = new XMLHttpRequest();
+  oReq.open("PUT", "http://127.0.0.1:3000/");
+  oReq.send(JSON.stringify(annotation));*/
+  const url = "http://127.0.0.1:3000/";
+  const options = {
+    method: 'put',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: annotation
+  };
+
+  fetch(url, options).catch(err => {
+    console.error('Request failed', err)
+  })
+
+};
+
+/**
+ * Make a web annotation message
+ * @param annoType
+ * @param annoValue
+ * @returns {string}
+ */
+function makeAnnotationBody(annoType, annoValue) {
+  return  JSON.stringify({ "@context": "http://www.w3.org/ns/anno.jsonld", "creator": window.location.hostname, "id": "http://example.org/msa/anno", "type": "Annotation","created": new Date().toISOString(), "body": {"type" : annoType,"value" : annoValue,"format" : "text/plain"},"target": [ "http://127.0.0.1/prov/", './prov/model'] });
 }
 
 // Use the WebRequest API
