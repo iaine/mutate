@@ -2,7 +2,6 @@
  *  Web extension to watch the human interactions with the
  *  screen. The msa sits in the background.
  *
- *  @todo: Sonify me!
  */
 
 let adsr = function (audioCtx, T, adsrEnv) {
@@ -103,6 +102,16 @@ let handleEventCoord = function (evt) {
     return touchPoint;
 };
 
+let handleKeyStroke = function (evt) {
+    const key;
+
+    //capture evt.charCode or keyCode. 
+    // use to drive the sonification?
+    const adsrEnv = {'a': 0.1, 'd': 0.8, 's': 0.3, 'r': 0.1, 'sustain': 0.1}; 
+    playEnvelopeTone(AudioCtx, 340.25, 0.5, 0.5, adsrEnv, position);
+
+}
+
 /**
  *  Generic PUT Function
  *
@@ -138,6 +147,7 @@ function makeAnnotationBody(annoType, annoValue) {
 }
 
 try {
+    //pointer and mice events
     document.addEventListener("touchstart", checkEvent);
     document.addEventListener("touchend", checkEvent);
     document.addEventListener("touchcancel", checkEvent);
@@ -150,7 +160,10 @@ try {
     document.addEventListener("pointerdown", checkEvent);
     document.addEventListener("pointerup", checkEvent);
     document.addEventListener("click", checkEvent);
-    document.addEventListener("dblclick", checkEvent)
+    document.addEventListener("dblclick", checkEvent);
+    //keypresses
+    document.addEventListener("keydown", handleKeyStroke);
+    document.addEventListener("keypress", handleKeyStroke);
 } catch (e) {
     console.error("WebEx: " + e)
 }
