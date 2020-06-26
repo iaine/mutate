@@ -19,7 +19,7 @@
     "<all_urls>"
   ],
   "background": {
-    "scripts": ["msa.js"]
+    "scripts": ["background.js"]
   },
   "content_scripts": [
     {

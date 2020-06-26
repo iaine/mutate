@@ -20,6 +20,30 @@ let adsr = function (audioCtx, T, adsrEnv) {
 };
 
 /**
+ * Fade the tone up or down based on method
+ */
+let fadeTone = function(audioCtx, pos, now, volume) {
+  //fade (audioCtx, pos, now, volume) {
+    var gainNode = audioCtx.createGain();
+
+    if (pos == "up") {
+      gainNode.gain.setValueAtTime(0.0, now);
+      gainNode.gain.linearRampToValueAtTime((volume*0.25), now + 0.1);
+      gainNode.gain.linearRampToValueAtTime((volume*0.5), now + 0.2);
+      gainNode.gain.linearRampToValueAtTime((volume*0.75), now + 0.3);
+      gainNode.gain.linearRampToValueAtTime(volume, now + 0.5);
+    } else {
+      gainNode.gain.setValueAtTime(volume, now);
+      gainNode.gain.linearRampToValueAtTime((volume*0.75), now + 0.1);
+      gainNode.gain.linearRampToValueAtTime((volume*0.5), now + 0.2);
+      gainNode.gain.linearRampToValueAtTime((volume*0.25), now + 0.3);
+      gainNode.gain.linearRampToValueAtTime(0.0, now + 0.5);
+    }
+
+  return gainNode;
+}
+
+/**
  * Method to play the tone using an ADSR envelope instead of a pure tone
  * @param audioContext
  * @param frequency
@@ -28,36 +52,39 @@ let adsr = function (audioCtx, T, adsrEnv) {
  * @param adsrEnv
  * @param id
  */
-let playTone = function (audioContext, frequency, note_length, volume) {
-  this.context = audioContext;
+let playTone = function (audioContext, frequency, note_length, volume, pos) {
 
-  const nowtime = this.context.currentTime;
+  const nowtime = audioContext.currentTime;
 
-  let oscillator = this.context.createOscillator();
+  let oscillator = audioContext.createOscillator();
 
-  let gainNode = this.context.createGain();
-  gainNode.gain.setValueAtTime(volume, nowtime);
+  let gainNode = fadeTone(audioContext, pos, nowtime, 0.5);
+  //gainNode.gain.setValueAtTime(volume, nowtime);
 
-  oscillator.type = "sine";
+  oscillator.type = "saw";
   oscillator.frequency.setValueAtTime(frequency, nowtime);
   oscillator.frequency.exponentialRampToValueAtTime(frequency, nowtime + 0.03);
   oscillator.start(nowtime);
   oscillator.stop(nowtime + note_length);
 
   //connect all the parts up now
-  oscillator.connect(this.context.destination);
-  gainNode.connect(this.context.destination);
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
 
 };
 
 function logURL(requestDetails) {
-  console.log("Background Loading: " + requestDetails.url);
-  console.log("Method: " + requestDetails.method);
+  console.log(requestDetails.method)
   if (requestDetails.url != "http://127.0.0.1:3000/") {
     //@todo: swap the frequency based on type.
     const adsrEnv = {'a': 0.1, 'd': 0.8, 's': 0.3, 'r': 0.1, 'sustain': 0.1};
-    playTone(audioCtx, 329.63, 0.1, 0.5);
-    putData(makeAnnotationBody(requestDetails.url, requestDetails.method));
+    if (requestDetails.method == "GET") {
+      playTone(audioCtx, 329.63, 0.1, 0.5, "down");
+    } else {
+      playTone(audioCtx, 440.04, 0.2, 0.2, "up");
+    }
+    //sound here for the 
+    //putData(makeAnnotationBody(requestDetails.url, requestDetails.method));
   }
 }
 
@@ -66,10 +93,6 @@ function logURL(requestDetails) {
  *
  */
 var putData = function (annotation) {
-  console.log(annotation);
-  /*var oReq = new XMLHttpRequest();
-  oReq.open("PUT", "http://127.0.0.1:3000/");
-  oReq.send(JSON.stringify(annotation));*/
   const url = "http://127.0.0.1:3000/";
   const options = {
     method: 'put',

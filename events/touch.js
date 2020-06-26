@@ -3,6 +3,7 @@
  *  screen. The msa sits in the background.
  *
  */
+var AudioCtx = new AudioContext();
 
 let adsr = function (audioCtx, T, adsrEnv) {
     let gainNode = audioCtx.createGain();
@@ -25,33 +26,31 @@ let playEnvelopeTone = function (audioContext, frequency, note_length, volume, a
 
   let oscillator = audioContext.createOscillator();
 
-    //let y = ((window.innerHeight/2) + pos.y);
-    let y = pos.y;
-    let x = pos.x;
-    //let x = ((window.innerWidth/2) + pos.x);
-    let z = 100;
+  let y = pos.y;
+  let x = pos.x;
+  let z = 100;
 
-    let listener = audioContext.listener;
+  let listener = audioContext.listener;
 
-    // Create static position for the listener
-    if(listener.forwardX) {
-        listener.forwardX.value = 0;
-        listener.forwardY.value = 0;
-        listener.forwardZ.value = -1;
-        listener.upX.value = 0;
-        listener.upY.value = 1;
-        listener.upZ.value = 0;
-    } else {
-        listener.setOrientation(0,0,-1,0,1,0);
-    }
+  // Create static position for the listener
+  if(listener.forwardX) {
+      listener.forwardX.value = 0;
+      listener.forwardY.value = 0;
+      listener.forwardZ.value = -1;
+      listener.upX.value = 0;
+      listener.upY.value = 1;
+      listener.upZ.value = 0;
+  } else {
+      listener.setOrientation(0,0,-1,0,1,0);
+  }
 
-    if(listener.positionX) {
-        listener.positionX.value = pos.x;
-        listener.positionY.value = (window.innerHeight/2);
-        listener.positionZ.value = z;
-    } else {
-        listener.setPosition(pos.x, (window.innerHeight/2), z);
-    }
+  if(listener.positionX) {
+      listener.positionX.value = pos.x;
+      listener.positionY.value = (window.innerHeight/2);
+      listener.positionZ.value = z;
+  } else {
+      listener.setPosition(pos.x, (window.innerHeight/2), z);
+  }
 
   oscillator.type = "sine";
   oscillator.frequency.setValueAtTime(frequency, nowtime);
@@ -82,15 +81,17 @@ var checkButtons = function() {
  */
 
 let checkEvent = function (evt) {
+    console.log('in event');
+
     //@todo: use evt.type in the
     //function (audioContext, frequency, note_length, volume, adsrEnv, pos)
-    let AudioCtx = new AudioContext();
+
     const adsrEnv = {'a': 0.1, 'd': 0.8, 's': 0.3, 'r': 0.1, 'sustain': 0.1};
     let position = handleEventCoord(evt);
     //sonify the event
     playEnvelopeTone(AudioCtx, 260.25, 0.5, 0.5, adsrEnv, position);
     //PUT the event
-    putData(makeAnnotationBody(evt.type, position) );
+    //putData(makeAnnotationBody(evt.type, position) );
 };
 
 let handleEventCoord = function (evt) {
@@ -103,12 +104,14 @@ let handleEventCoord = function (evt) {
 };
 
 let handleKeyStroke = function (evt) {
-    const key;
+    //const key;
 
-    //capture evt.charCode or keyCode. 
+    //capture evt.charCode or keyCode.
+    const key = evt.key;
     // use to drive the sonification?
-    const adsrEnv = {'a': 0.1, 'd': 0.8, 's': 0.3, 'r': 0.1, 'sustain': 0.1}; 
-    playEnvelopeTone(AudioCtx, 340.25, 0.5, 0.5, adsrEnv, position);
+    const adsrEnv = {'a': 0.1, 'd': 0.8, 's': 0.3, 'r': 0.1, 'sustain': 0.1};
+    console.log("note " + key.charCodeAt());
+    playEnvelopeTone(AudioCtx, (100 + key.charCodeAt()), 0.75, 0.5, adsrEnv, {x: window.innerWidth/2, y: window.innerHeight/2});
 
 }
 
@@ -118,9 +121,6 @@ let handleKeyStroke = function (evt) {
  */
 var putData = function (annotation) {
 
-    /*var oReq = new XMLHttpRequest();
-    oReq.open("PUT", "http://127.0.0.1:3000/");
-    oReq.send(JSON.stringify(annotation));*/
     const url = "http://127.0.0.1:3000/";
     const options = {
         method: 'put',
