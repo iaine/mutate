@@ -81,10 +81,6 @@ var checkButtons = function() {
  */
 
 let checkEvent = function (evt) {
-    console.log('in event');
-
-    //@todo: use evt.type in the
-    //function (audioContext, frequency, note_length, volume, adsrEnv, pos)
 
     const adsrEnv = {'a': 0.1, 'd': 0.8, 's': 0.3, 'r': 0.1, 'sustain': 0.1};
     let position = handleEventCoord(evt);
@@ -111,8 +107,9 @@ let handleKeyStroke = function (evt) {
     // use to drive the sonification?
     const adsrEnv = {'a': 0.1, 'd': 0.8, 's': 0.3, 'r': 0.1, 'sustain': 0.1};
     console.log("note " + key.charCodeAt());
-    playEnvelopeTone(AudioCtx, (100 + key.charCodeAt()), 0.75, 0.5, adsrEnv, {x: window.innerWidth/2, y: window.innerHeight/2});
-
+    //two tones here. Warmer is human and the machine is higher register. 
+    playEnvelopeTone(AudioCtx, makeCipher(key), 0.75, 0.5, adsrEnv, {x: window.innerWidth/2, y: window.innerHeight/2});
+    playEnvelopeTone(AudioCtx, (400 + key.charCodeAt()), 0.75, 0.5, adsrEnv, {x: window.innerWidth/2, y: window.innerHeight/2});
 }
 
 /**
@@ -169,3 +166,47 @@ try {
 }
 // capture the x and y positions for available
 // events
+
+const haydnCipher = {
+    'A' : 98.00, 
+    'B' : 103.83, 
+    'C' : 130.81, 
+    'D' : 138.59, 
+    'E' : 146.83,
+    'F' : 155.56,
+    'G' : 164.81, 
+    'H' : 174.61, 
+    'I' : 185.00, 
+    'J' : 196.00, 
+    'K' : 207.65, 
+    'L' : 220.00, 
+    'M' : 233.08, 
+    'N' : 246.94, 
+    'O' : 261.63, 
+    'P' : 277.18,
+    'Q' : 293.66, 
+    'R' : 311.13, 
+    'S' : 329.63, 
+    'T' : 349.23, 
+    'U' : 369.99,
+    'V' : 392.00,
+    'W' : 415.30, 
+    'X' : 440.00, 
+    'Y' : 466.16, 
+    'Z' : 493.88
+   };
+
+   /**
+    * Map to key to the Haydn Cipher. 
+    * If key is not in the alphabet, then return standard note
+    * @todo: Number keys...
+    * @param {Number} characterKey 
+    */
+let makeCipher = function (characterKey) {
+
+    if (haydnCipher[characterKey.toUpperCase()].toFixed(2)) {
+        return haydnCipher[characterKey.toUpperCase()].toFixed(2)
+    }
+
+    return 130.01;
+}
